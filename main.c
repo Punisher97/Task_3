@@ -99,6 +99,30 @@ void addword(void){
     nullbuf();
 }
 
+void print_shortest_words(void) {
+    
+    /* Находим минимальную длину */
+    int min_length = -1;
+
+    for (int i = 0; i < curlist; i++) {
+        if (lst[i] != NULL) {
+            int len = strlen(lst[i]);
+            if (min_length == -1 || len < min_length) {
+                min_length = len;
+            }
+        }
+    }
+
+
+    /* Выводим все слова минимальной длины */
+    printf("Shortest words (length %d):\n", min_length);
+    for (int i = 0; i < curlist; i++) {
+        if (lst[i] != NULL && strlen(lst[i]) == min_length) {
+            printf("%s\n", lst[i]);
+        }
+    }
+    printf("\n");
+}
 /* «Простой» символ: всё, что не разделитель и не спец-оператор */
 int symset(int ch){
     return ch!='\n' && ch!=' ' && ch!='\t' &&
@@ -106,6 +130,7 @@ int symset(int ch){
            ch!='>'  && ch!='<' && ch!='(' && ch!=')' &&
            ch!=EOF;
 }
+
 
 /* ===== main: конечный автомат ===== */
 int main(void){
@@ -122,21 +147,39 @@ int main(void){
     while(1==1) switch(V){case Start:
         if (c==' ' || c=='\t') { c=getsym(); }
         else if (c==EOF) {
+            if (curlist == 0){
+                clearlist();
+                V=Stop;
+                break;
+            }
             termlist();
             /* исходный порядок */
+            printf("=== Original order ===\n");
             printlist();
             /* отсортированный порядок */
             sortlist();
+            printf("=== Sorted order ===\n");
             printlist();
-            clearlist();
+            /* слова наименьшей длины */
+            printf("=== Shortest words ===\n");
+            print_shortest_words();
+    
+            clearlist();  // Очищаем ПОСЛЕ вывода
             V=Stop;
         }
         else if (c=='\n') {
             termlist();
-            printlist();
-            sortlist();
-            printlist();
-            V=Newline;
+            if (curlist>0){
+                printf("=== Original order ===\n");
+                printlist();
+                printf("=== Sorted order ===\n");
+                sortlist();
+                printlist();
+                printf("=== Shortest words ===\n");
+                print_shortest_words();
+            }
+            clearlist();  
+            V=Start;      
             c=getsym();
         }
         else {
